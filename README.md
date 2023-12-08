@@ -58,12 +58,68 @@ protocolHandlerDirectory=./protocols
 ```
 amqpListeners=amqp://127.0.0.1:5672
 advertisedAddress=127.0.0.1
+```
 
 ## 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### 启动服务
+以standalone模式启动pulsar服务
+```
+$PULSAR_HOME/bin/pulsar standalone
+```
+
+### 使用rabbitmq客户端进行测试
+
+    ```
+    # add RabbitMQ client dependency in your project
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>5.8.0</version>
+    </dependency>
+    ```
+
+    ```
+    // Java Code
+    
+    // create connection
+    ConnectionFactory connectionFactory = new ConnectionFactory();
+    connectionFactory.setVirtualHost("vhost1");
+    connectionFactory.setHost("127.0.0.1");
+    connectionFactory.setPort(5672);
+    Connection connection = connectionFactory.newConnection();
+    Channel channel = connection.createChannel();
+    
+    String exchange = "ex";
+    String queue = "qu";
+    
+    // exchage declare
+    channel.exchangeDeclare(exchange, BuiltinExchangeType.FANOUT, true, false, false, null);
+    
+    // queue declare and bind
+    channel.queueDeclare(queue, true, false, false, null);
+    channel.queueBind(queue, exchange, "");
+    
+    // publish some messages
+    for (int i = 0; i < 100; i++) {
+        channel.basicPublish(exchange, "", null, ("hello - " + i).getBytes());
+    }
+    
+    // consume messages
+    CountDownLatch countDownLatch = new CountDownLatch(100);
+    channel.basicConsume(queue, true, new DefaultConsumer(channel) {
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            System.out.println("receive msg: " + new String(body));
+            countDownLatch.countDown();
+        }
+    });
+    countDownLatch.await();
+    
+    // release resource
+    channel.close();
+    connection.close();
+    ```
 
 ## 参与贡献
 
