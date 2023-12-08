@@ -1,25 +1,71 @@
 # amqp-proxy
 
-#### 介绍
+## 介绍
 A new AMQP protocol proxy architecture model, based on which Apache Pulsar can better support amqp protocol messages from terminals such as rabbitmq-client, openstack oslo-messaging client.
 
-#### 软件架构
+## 软件架构
 软件架构说明
 
 
-#### 安装教程
+## 安装教程
+
+### 下载Pulsar
+下载[Pulsar2.7.2](https://github.com/streamnative/pulsar/releases/download/v2.7.1/apache-pulsar-2.7.1-bin.tar.gz)安装包,并解压
+
+### 下载并构建amqp-proxy插件
+
+下载链接： https://gitee.com/openeuler/amqp-proxy.git
+
+### 从代码中构建
+
+1. 从gitee中下载代码到本地
+```bash
+git clone https://gitee.com/openeuler/amqp-proxy.git
+cd aop
+```
+2. 编译打包
+```bash
+mvn clean install -DskipTests
+```
+3. nar包可以从如下位置获取到
+```bash
+./amqp-impl/target/pulsar-protocol-handler-amqp-${version}.nar
+```
+
+### 配置
+
+|Name|Description|Default|
+|---|---|---|
+amqpTenant|AMQP on pulsar broker tenant|public
+amqpListeners|AMQP service port|amqp://127.0.0.1:5672
+amqpMaxNoOfChannels|The maximum number of channels which can exist concurrently on a connection|64
+amqpMaxFrameSize|The maximum frame size on a connection|4194304 (4MB)
+amqpMaxMessageSize|The maximum message size|4194304 (4MB)
+
+###配置amqp-proxy插件
+
+1. 插件配置
+你需要配置“messagingProtocols”和“protocolHandlerDirectory”两个参数，messagingProtocols的值为amqp,protocolHandlerDirectory默认值为“./protocols”，protocolHandlerDirectory配置的是插件位置，运行全需要将nar上传到当前配置的文件夹下
+
+e.g.
+```access transformers
+messagingProtocols=amqp
+protocolHandlerDirectory=./protocols
+```
+
+2. 配置AMQP SERVICE LISTENERS
+   e.g.
+```
+amqpListeners=amqp://127.0.0.1:5672
+advertisedAddress=127.0.0.1
+
+## 使用说明
 
 1.  xxxx
 2.  xxxx
 3.  xxxx
 
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
+## 参与贡献
 
 1.  Fork 本仓库
 2.  新建 Feat_xxx 分支
@@ -27,7 +73,7 @@ A new AMQP protocol proxy architecture model, based on which Apache Pulsar can b
 4.  新建 Pull Request
 
 
-#### 特技
+## 特技
 
 1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
 2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
